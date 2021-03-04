@@ -19,14 +19,21 @@ namespace HdHrMonitor
             while (true)
             {
                 var start = DateTimeOffset.UtcNow;
-                var data = await Task.WhenAll(
-                    GetTunerData(c0, $"http://{server}/tuners.html?page=tuner0", 0),
-                    GetTunerData(c1, $"http://{server}/tuners.html?page=tuner1", 1),
-                    GetTunerData(c2, $"http://{server}/tuners.html?page=tuner2", 2)
-                );
-                await using var cx = new DataContext();
-                cx.Data.AddRange(data);
-                await cx.SaveChangesAsync();
+                try
+                {
+                    var data = await Task.WhenAll(
+                        GetTunerData(c0, $"http://{server}/tuners.html?page=tuner0", 0),
+                        GetTunerData(c1, $"http://{server}/tuners.html?page=tuner1", 1),
+                        GetTunerData(c2, $"http://{server}/tuners.html?page=tuner2", 2)
+                    );
+                    await using var cx = new DataContext();
+                    cx.Data.AddRange(data);
+                    await cx.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Exception: ${ex}");
+                }
                 var wait = TimeSpan.FromSeconds(5).Subtract(DateTimeOffset.UtcNow.Subtract(start));
                 if (wait.TotalMilliseconds < 100)
                 {
@@ -38,6 +45,9 @@ namespace HdHrMonitor
         }
 
         static Regex _splitter = new Regex("<td>([^<]*)</td><td>([^<]*)</td>");
+        static Regex _signalStrengthSplitter = new Regex(@"(\d*)% \(([-0-9.]*) dBmV\)");
+        static Regex _signalQualitySplitter = new Regex(@"(\d*)% \(([0-9.]*) dB\)");
+        static Regex _symbolQualitySplitter = new Regex(@"(\d*)%");
 
         private static async Task<Data> GetTunerData(HttpClient client, string url, int tuner)
         {
@@ -57,6 +67,16 @@ namespace HdHrMonitor
             results.TryGetValue("Streaming Rate", out var rate);
             results.TryGetValue("Resource Lock", out var rlock);
 
+            var signalStrength = string.IsNullOrEmpty(strength) ? null : _signalStrengthSplitter.Match(strength);
+            var signalQuality = string.IsNullOrEmpty(quality) ? null : _signalQualitySplitter.Match(quality);
+            var symbolQuality = string.IsNullOrEmpty(symbol) ? null : _symbolQualitySplitter.Match(symbol);
+
+            var signalStrengthPct = (signalStrength == null || !signalStrength.Success) ? (decimal?)null : decimal.Parse(signalStrength.Groups[1].Value);
+            var signalStrengthDb = (signalStrength == null || !signalStrength.Success) ? (decimal?)null : decimal.Parse(signalStrength.Groups[2].Value);
+            var signalQualityPct = (signalQuality == null || !signalQuality.Success) ? (decimal?)null : decimal.Parse(signalQuality.Groups[1].Value);
+            var signalQualityDb = (signalQuality == null || !signalQuality.Success) ? (decimal?)null : decimal.Parse(signalQuality.Groups[2].Value);
+            var symbolQualityPct = (symbolQuality == null || !symbolQuality.Success) ? (decimal?)null : decimal.Parse(symbolQuality.Groups[1].Value);
+
             return new Data()
             {
                 DateTimeUtc = DateTimeOffset.UtcNow,
@@ -73,6 +93,11 @@ namespace HdHrMonitor
                 SymbolQuality = symbol,
                 StreamingRateRaw = rate,
                 ResourceLock = rlock,
+                SignalStrengthPct = signalStrengthPct,
+                SignalStrengthDbm = signalStrengthDb,
+                SignalQualityPct = signalQualityPct,
+                SignalQualityDbm = signalQualityDb,
+                SymbolQualityPct = symbolQualityPct,
             };
         }
     }

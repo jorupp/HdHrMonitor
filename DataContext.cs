@@ -36,11 +36,14 @@ namespace HdHrMonitor
         public string SignalQuality { get; set; }
         public string SymbolQuality { get; set; }
 
-        //public int SignalStrengthPct { get; set; }
-        //public int SignalStrengthDbm { get; set; }
-        //public int SignalQualityPct { get; set; }
-        //public int SignalQualityDbm { get; set; }
-        //public int SymbolQualityPct { get; set; }
+        public decimal? SignalStrengthPct { get; set; }
+        public decimal? SignalStrengthDbm { get; set; }
+
+        public decimal? SignalQualityPct { get; set; }
+        public decimal? SignalQualityDbm { get; set; }
+
+        public decimal? SymbolQualityPct { get; set; }
+
         public string StreamingRateRaw { get; set; }
         public string ResourceLock { get; set; }
     }
