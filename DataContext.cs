@@ -18,6 +18,26 @@ namespace HdHrMonitor
         public DbSet<Data> Data { get; set; }
     }
 
+    public enum Authorization
+    {
+        None = 0,
+        NotSubscribed,
+        Subscribed,
+    }
+
+    public enum Protection
+    {
+        None = 0,
+        Unrestricted,
+        ProtectedCopyNever,
+        ProtectedCopyOnce
+    }
+    public enum Lock
+    {
+        None = 0,
+        Locked,
+    }
+
     public class Data
     {
         [Key]
@@ -28,13 +48,16 @@ namespace HdHrMonitor
         public string ChannelFrequency { get; set; }
         public string ProgramNumber { get; set; }
         public string Authorization { get; set; }
+        public Authorization? AuthorizationEnum { get; set;  }
         public string CCIProtection { get; set; }
+        public Protection? CCIProtectionEnum { get; set; }
         public string ModulationLock { get; set; }
-        public string PCRLock { get; set;  }
+        public string PCRLock { get; set; }
+        public Lock? PCRLockEnum { get; set; }
 
-        public string SignalStrength { get; set; }
-        public string SignalQuality { get; set; }
-        public string SymbolQuality { get; set; }
+        //public string SignalStrength { get; set; }
+        //public string SignalQuality { get; set; }
+        //public string SymbolQuality { get; set; }
 
         public decimal? SignalStrengthPct { get; set; }
         public decimal? SignalStrengthDbm { get; set; }

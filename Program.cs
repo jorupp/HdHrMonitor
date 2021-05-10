@@ -21,11 +21,11 @@ namespace HdHrMonitor
                 var start = DateTimeOffset.UtcNow;
                 try
                 {
-                    var data = await Task.WhenAll(
+                    var data = (await Task.WhenAll(
                         GetTunerData(c0, $"http://{server}/tuners.html?page=tuner0", 0),
                         GetTunerData(c1, $"http://{server}/tuners.html?page=tuner1", 1),
                         GetTunerData(c2, $"http://{server}/tuners.html?page=tuner2", 2)
-                    );
+                    )).Where(i => i.Channel != "none").ToList();
                     await using var cx = new DataContext();
                     cx.Data.AddRange(data);
                     await cx.SaveChangesAsync();
@@ -77,6 +77,10 @@ namespace HdHrMonitor
             var signalQualityDb = (signalQuality == null || !signalQuality.Success) ? (decimal?)null : decimal.Parse(signalQuality.Groups[2].Value);
             var symbolQualityPct = (symbolQuality == null || !symbolQuality.Success) ? (decimal?)null : decimal.Parse(symbolQuality.Groups[1].Value);
 
+            var authEnum = ParseAuthorization(ref auth);
+            var cciEnum = ParseProtection(ref cci);
+            var pcrEnum = ParseLock(ref pcr);
+
             return new Data()
             {
                 DateTimeUtc = DateTimeOffset.UtcNow,
@@ -88,9 +92,12 @@ namespace HdHrMonitor
                 CCIProtection = cci,
                 ModulationLock = mod,
                 PCRLock = pcr,
-                SignalStrength = strength,
-                SignalQuality = quality,
-                SymbolQuality = symbol,
+                AuthorizationEnum = authEnum,
+                CCIProtectionEnum = cciEnum,
+                PCRLockEnum = pcrEnum,
+                //SignalStrength = strength,
+                //SignalQuality = quality,
+                //SymbolQuality = symbol,
                 StreamingRateRaw = rate,
                 ResourceLock = rlock,
                 SignalStrengthPct = signalStrengthPct,
@@ -99,6 +106,60 @@ namespace HdHrMonitor
                 SignalQualityDbm = signalQualityDb,
                 SymbolQualityPct = symbolQualityPct,
             };
+        }
+
+        public static Authorization? ParseAuthorization(ref string authorization)
+        {
+            switch(authorization)
+            {
+                case "not-subscribed":
+                    authorization = null;
+                    return Authorization.NotSubscribed;
+                case "subscribed":
+                    authorization = null;
+                    return Authorization.Subscribed;
+                case "none":
+                    authorization = null;
+                    return Authorization.None;
+                case "unspecified":
+                    authorization = null;
+                    return null;
+            }
+            return null;
+        }
+
+        public static Protection? ParseProtection(ref string cci)
+        {
+            switch (cci)
+            {
+                case "unrestricted":
+                    cci = null;
+                    return Protection.Unrestricted;
+                case "protected-copynever":
+                    cci = null;
+                    return Protection.ProtectedCopyNever;
+                case "protected-copyonce":
+                    cci = null;
+                    return Protection.ProtectedCopyOnce;
+                case "none":
+                    cci = null;
+                    return Protection.None;
+            }
+            return null;
+        }
+
+        public static Lock? ParseLock(ref string pcr)
+        {
+            switch (pcr)
+            {
+                case "locked":
+                    pcr = null;
+                    return Lock.Locked;
+                case "none":
+                    pcr = null;
+                    return Lock.None;
+            }
+            return null;
         }
     }
 }

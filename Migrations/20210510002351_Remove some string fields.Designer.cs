@@ -4,14 +4,16 @@ using HdHrMonitor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace HdHrMonitor.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20210510002351_Remove some string fields")]
+    partial class Removesomestringfields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,14 +30,8 @@ namespace HdHrMonitor.Migrations
                     b.Property<string>("Authorization")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("AuthorizationEnum")
-                        .HasColumnType("int");
-
                     b.Property<string>("CCIProtection")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("CCIProtectionEnum")
-                        .HasColumnType("int");
 
                     b.Property<string>("Channel")
                         .HasColumnType("nvarchar(max)");
@@ -51,9 +47,6 @@ namespace HdHrMonitor.Migrations
 
                     b.Property<string>("PCRLock")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("PCRLockEnum")
-                        .HasColumnType("int");
 
                     b.Property<string>("ProgramNumber")
                         .HasColumnType("nvarchar(max)");
