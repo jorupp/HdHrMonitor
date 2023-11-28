@@ -12,4 +12,5 @@ dotnet ef database update
 ## Running it
 
 - Create a launch profile passing the IP of the HD Homerun Prime
+- Run the tool (ctrl-F5 if you don't want to debug it)
 - Query the `Data` table in the DB to explore the data.  I expect I'll add some queries here once I find some interesting ones for debugging.
