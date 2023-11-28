@@ -12,7 +12,7 @@ namespace HdHrMonitor
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer(@"Server=.\sqlexpress;Database=HdHrMonitor;Trusted_Connection=True;");
+            optionsBuilder.UseSqlServer(@"Server=.;Database=HdHrMonitor;Trusted_Connection=True;TrustServerCertificate=true;");
         }
 
         public DbSet<Data> Data { get; set; }
